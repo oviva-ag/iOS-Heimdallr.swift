@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "Heimdallr",
     platforms: [
-        .iOS(.v15)
+        .iOS(.v16)
     ],
     products: [
         .library(
