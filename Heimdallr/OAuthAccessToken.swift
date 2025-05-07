@@ -16,20 +16,25 @@ public class OAuthAccessToken: NSObject {
     /// The refresh token.
     public let refreshToken: String?
 
+    /// The ID Token.
+    public let idToken: String?
+
     /// Initializes a new access token.
     ///
     /// - parameter accessToken: The access token.
     /// - parameter tokenType: The access token's type.
     /// - parameter expiresAt: The access token's expiration date.
     /// - parameter refreshToken: The refresh token.
+    /// - parameter idToken: The ID Token.
     ///
     /// - returns: A new access token initialized with access token, type,
     ///     expiration date and refresh token.
-    public init(accessToken: String, tokenType: String, expiresAt: Date? = nil, refreshToken: String? = nil) {
+    public init(accessToken: String, tokenType: String, expiresAt: Date? = nil, refreshToken: String? = nil, idToken: String? = nil) {
         self.accessToken = accessToken
         self.tokenType = tokenType
         self.expiresAt = expiresAt
         self.refreshToken = refreshToken
+        self.idToken = idToken
     }
 
     /// Copies the access token, using new values if provided.
@@ -38,14 +43,16 @@ public class OAuthAccessToken: NSObject {
     /// - parameter tokenType: The new access token's type.
     /// - parameter expiresAt: The new access token's expiration date.
     /// - parameter refreshToken: The new refresh token.
+    /// - parameter idToken: The new ID Token.
     ///
     /// - returns: A new access token with this access token's values for
     ///     properties where new ones are not provided.
-    public func copy(accessToken: String? = nil, tokenType: String? = nil, expiresAt: Date?? = nil, refreshToken: String?? = nil) -> OAuthAccessToken {
+    public func copy(accessToken: String? = nil, tokenType: String? = nil, expiresAt: Date?? = nil, refreshToken: String?? = nil, idToken: String?? = nil) -> OAuthAccessToken {
         return OAuthAccessToken(accessToken: accessToken ?? self.accessToken,
                                 tokenType: tokenType ?? self.tokenType,
                                 expiresAt: expiresAt ?? self.expiresAt,
-                                refreshToken: refreshToken ?? self.refreshToken)
+                                refreshToken: refreshToken ?? self.refreshToken,
+                                idToken: idToken ?? self.idToken)
     }
 }
 
@@ -54,6 +61,7 @@ public func == (lhs: OAuthAccessToken, rhs: OAuthAccessToken) -> Bool {
         && lhs.tokenType == rhs.tokenType
         && lhs.expiresAt == rhs.expiresAt
         && lhs.refreshToken == rhs.refreshToken
+        && lhs.idToken == rhs.idToken
 }
 
 extension OAuthAccessToken {
@@ -71,9 +79,9 @@ extension OAuthAccessToken {
 
         let expiresAt = (json["expires_in"] as? TimeInterval).flatMap(toDate)
         let refreshToken = json["refresh_token"] as? String
+        let idToken = json["id_token"] as? String
 
-        return OAuthAccessToken(accessToken: accessToken, tokenType: tokenType,
-                                expiresAt: expiresAt, refreshToken: refreshToken)
+        return OAuthAccessToken(accessToken: accessToken, tokenType: tokenType, expiresAt: expiresAt, refreshToken: refreshToken, idToken: idToken)
     }
 
     public class func decode(data: Data) -> OAuthAccessToken? {
