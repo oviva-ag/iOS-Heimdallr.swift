@@ -7,13 +7,4 @@
    <FileRef
       location = "container:Heimdallr.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:Carthage/Checkouts/Nimble/Nimble.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Carthage/Checkouts/OHHTTPStubs/OHHTTPStubs/OHHTTPStubs.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Carthage/Checkouts/Quick/Quick.xcodeproj">
-   </FileRef>
 </Workspace>

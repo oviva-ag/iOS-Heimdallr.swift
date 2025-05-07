@@ -1,10 +1,9 @@
 import Heimdallr
 import Nimble
 import Quick
-import Result
 
 class OAuthAccessTokenSpec: QuickSpec {
-    override func spec() {
+    override class func spec() {
         describe("-copy") {
             let accessToken = OAuthAccessToken(accessToken: "accessToken",
                                                  tokenType: "tokenType",

@@ -3,7 +3,7 @@ import Nimble
 import Quick
 
 class OAuthAccessTokenKeychainStoreSpec: QuickSpec {
-    override func spec() {
+    override class func spec() {
         let accessToken = "01234567-89ab-cdef-0123-456789abcdef"
         let tokenType = "Bearer"
         let expiresAt = Date(timeIntervalSince1970: 0)
