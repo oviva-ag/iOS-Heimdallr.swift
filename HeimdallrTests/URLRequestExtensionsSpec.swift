@@ -3,7 +3,7 @@ import Nimble
 import Quick
 
 class HTTPAuthenticationSpec: QuickSpec {
-    override func spec() {
+    override class func spec() {
         describe("<Equatable> ==") {
             context("basicAuthentication") {
                 it("returns true if usernames and passwords match") {
@@ -64,7 +64,7 @@ class HTTPAuthenticationSpec: QuickSpec {
 }
 
 class URLRequestExtensionsSpec: QuickSpec {
-    override func spec() {
+    override class func spec() {
         var request: URLRequest!
 
         beforeEach {
@@ -112,10 +112,10 @@ class URLRequestExtensionsSpec: QuickSpec {
 
             context("when given .accessTokenAuthentication") {
                 it("sets the Authorization header with access token and token type") {
-                    let authentication: HTTPAuthentication = .accessTokenAuthentication(OAuthAccessToken(accessToken: "accessToken", tokenType: "tokenType"))
+                    let authentication: HTTPAuthentication = .accessTokenAuthentication(OAuthAccessToken(accessToken: "accessToken", tokenType: "bearer"))
                     request.setHTTPAuthorization(authentication)
 
-                    expect(request.HTTPAuthorization).to(equal("tokenType accessToken"))
+                    expect(request.HTTPAuthorization).to(equal("Bearer accessToken"))
                 }
             }
         }

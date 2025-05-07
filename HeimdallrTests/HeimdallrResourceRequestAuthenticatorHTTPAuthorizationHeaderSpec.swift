@@ -3,7 +3,7 @@ import Nimble
 import Quick
 
 class HeimdallResourceRequestAuthenticatorHTTPAuthorizationHeaderSpec: QuickSpec {
-    override func spec() {
+    override class func spec() {
         let resourceAuthenticator: HeimdallResourceRequestAuthenticatorHTTPAuthorizationHeader = HeimdallResourceRequestAuthenticatorHTTPAuthorizationHeader()
 
         describe("-authenticateResourceRequest:accessToken:") {

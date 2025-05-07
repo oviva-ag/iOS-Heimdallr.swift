@@ -2,7 +2,6 @@ import Heimdallr
 import Nimble
 import OHHTTPStubs
 import Quick
-import Result
 
 class OAuthAccessTokenMockStore: OAuthAccessTokenStore {
     var storeAccessTokenCalled: Bool = false
@@ -74,9 +73,9 @@ class HeimdallResourceRequestMockAuthenticator: HeimdallResourceRequestAuthentic
 }
 
 class HeimdallrSpec: QuickSpec {
-    let bundle = Bundle(for: HeimdallrSpec.self)
+    static let bundle = Bundle(for: HeimdallrSpec.self)
 
-    override func spec() {
+    override class func spec() {
         var accessTokenStore: OAuthAccessTokenMockStore!
         var accessTokenParser: OAuthAccessTokenInterceptorParser!
         var heimdallr: Heimdallr!
@@ -129,11 +128,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with a valid response") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-valid", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -142,11 +141,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("succeeds") {
-                    expect(result?.value).toNot(beNil())
+                    expect(try? result?.get()).toNot(beNil())
                 }
 
                 it("attempts to parse the access token") {
@@ -164,11 +163,11 @@ class HeimdallrSpec: QuickSpec {
             
             context("with a valid response and a failing token parser") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                         }, withStubResponse: { request in
                             let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-valid", withExtension: "json")!)
-                            return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                            return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
                     
                     let parseError = NSError(domain: ParserErrorDomain, code: HeimdallrErrorInvalidData, userInfo: nil)
@@ -181,11 +180,11 @@ class HeimdallrSpec: QuickSpec {
                 }
                 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
                 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -193,11 +192,21 @@ class HeimdallrSpec: QuickSpec {
                 }
                 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
                 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
                 
                 it("does not set the access token") {
@@ -208,11 +217,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an error response") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-error", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 400, headers: nil)
+                        return HTTPStubsResponse(data: data, statusCode: 400, headers: nil)
                     })
 
                     waitUntil { done in
@@ -221,11 +230,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("does not attempt to parse the access token") {
@@ -233,11 +242,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(OAuthErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(OAuthErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(OAuthErrorInvalidClient))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(OAuthErrorInvalidClient))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -247,11 +266,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an invalid response") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-invalid", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -260,11 +279,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -272,11 +291,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -286,11 +315,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an invalid response missing a token") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-invalid-token", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -299,11 +328,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -311,11 +340,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -326,11 +365,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an invalid response missing a type") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-invalid-type", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -339,11 +378,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -351,11 +390,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -373,11 +422,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with a valid response") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-valid", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -386,11 +435,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("succeeds") {
-                    expect(result?.value).toNot(beNil())
+                    expect(try? result?.get()).toNot(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -408,11 +457,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an error response") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-error", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 400, headers: nil)
+                        return HTTPStubsResponse(data: data, statusCode: 400, headers: nil)
                     })
 
                     waitUntil { done in
@@ -421,19 +470,29 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(OAuthErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(OAuthErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(OAuthErrorInvalidClient))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(OAuthErrorInvalidClient))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -443,11 +502,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an invalid response") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-invalid", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -456,11 +515,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -468,11 +527,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -482,11 +551,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an invalid response missing a token") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-invalid-token", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -495,11 +564,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -507,11 +576,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -521,11 +600,11 @@ class HeimdallrSpec: QuickSpec {
 
             context("with an invalid response missing a type") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-invalid-type", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -534,11 +613,11 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
                 
                 it("attempts to parse the access token") {
@@ -546,11 +625,21 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorInvalidData))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorInvalidData))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("does not set the access token") {
@@ -575,25 +664,35 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorNotAuthorized))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorNotAuthorized))
+                    default:
+                        fail()
+                    }
                 }
             }
 
             context("when authorized with a still valid access token") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "request-valid", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -606,26 +705,26 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("succeeds") {
-                    expect(result?.value).toNot(beNil())
+                    expect(try? result?.get()).toNot(beNil())
                 }
 
                 it("authenticates the request using the resource request authenticator") {
-                    expect(result?.value?.value(forHTTPHeaderField: "MockAuthorized")).to(equal("totally"))
+                    expect((try? result?.get())?.value(forHTTPHeaderField: "MockAuthorized")).to(equal("totally"))
                 }
 
             }
 
             context("when authorized with an expired access token and no refresh token") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (request.url!.absoluteString == "http://rheinfabrik.de")
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "request-invalid-norefresh", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -638,33 +737,42 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
 
                 it("fails") {
-                    expect(result?.value).to(beNil())
+                    expect(try? result?.get()).to(beNil())
                 }
 
                 it("fails with the correct error domain") {
-                    expect(result?.error?.domain).to(equal(HeimdallrErrorDomain))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.domain).to(equal(HeimdallrErrorDomain))
+                    default:
+                        fail()
+                    }
                 }
 
                 it("fails with the correct error code") {
-                    expect(result?.error?.code).to(equal(HeimdallrErrorNotAuthorized))
+                    switch result {
+                    case .failure(let error):
+                        expect(error.code).to(equal(HeimdallrErrorNotAuthorized))
+                    default:
+                        fail()
+                    }
                 }
-
             }
 
             context("when authorized with an expired access token and a valid refresh token") {
                 beforeEach {
-                    OHHTTPStubs.stubRequests(passingTest: { request in
+                    HTTPStubs.stubRequests(passingTest: { request in
                         return (
                             request.url!.absoluteString == "http://rheinfabrik.de"
                             && heimdallr.hasAccessToken == false
                             )
                     }, withStubResponse: { request in
                         let data = try! Data(contentsOf: self.bundle.url(forResource: "request-invalid", withExtension: "json")!)
-                        return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                        return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                     })
 
                     waitUntil { done in
@@ -673,7 +781,7 @@ class HeimdallrSpec: QuickSpec {
                 }
 
                 afterEach {
-                    OHHTTPStubs.removeAllStubs()
+                    HTTPStubs.removeAllStubs()
                 }
                 
                 it("attempts to parse the access token") {
@@ -682,11 +790,11 @@ class HeimdallrSpec: QuickSpec {
 
                 context("when refreshing the access token succeeds") {
                     beforeEach {
-                        OHHTTPStubs.stubRequests(passingTest: { request in
+                        HTTPStubs.stubRequests(passingTest: { request in
                             return (request.url!.absoluteString == "http://rheinfabrik.de")
                         }, withStubResponse: { request in
                             let data = try! Data(contentsOf: self.bundle.url(forResource: "request-invalid", withExtension: "json")!)
-                            return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                            return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                         })
 
                         waitUntil { done in
@@ -695,7 +803,7 @@ class HeimdallrSpec: QuickSpec {
                     }
 
                     it("succeeds") {
-                        expect(result?.value).toNot(beNil())
+                        expect(try? result?.get()).toNot(beNil())
                     }
                     
                     it("attempts to parse the fresh token") {
@@ -703,17 +811,17 @@ class HeimdallrSpec: QuickSpec {
                     }
 
                     it("authenticates the request using the resource request authenticator") {
-                        expect(result?.value?.value(forHTTPHeaderField: "MockAuthorized")).to(equal("totally"))
+                        expect((try? result?.get())?.value(forHTTPHeaderField: "MockAuthorized")).to(equal("totally"))
                     }
                 }
 
                 context("when refreshing the access token fails") {
                     beforeEach {
-                        OHHTTPStubs.stubRequests(passingTest: { request in
+                        HTTPStubs.stubRequests(passingTest: { request in
                             return (request.url!.absoluteString == "http://rheinfabrik.de")
                         }, withStubResponse: { request in
                             let data = try! Data(contentsOf: self.bundle.url(forResource: "authorize-error", withExtension: "json")!)
-                            return OHHTTPStubsResponse(data: data, statusCode: 400, headers: [ "Content-Type": "application/json" ])
+                            return HTTPStubsResponse(data: data, statusCode: 400, headers: [ "Content-Type": "application/json" ])
                         })
                         
                         waitUntil { done in
@@ -726,19 +834,29 @@ class HeimdallrSpec: QuickSpec {
                     }
 
                     it("fails") {
-                        expect(result?.value).to(beNil())
+                        expect(try? result?.get()).to(beNil())
                     }
-                    
+
                     it("does not attempt to parse the fresh token") {
                         expect(accessTokenParser.timesCalled).to(equal(1))
                     }
 
                     it("fails with the correct error domain") {
-                        expect(result?.error?.domain).to(equal(OAuthErrorDomain))
+                        switch result {
+                        case .failure(let error):
+                            expect(error.domain).to(equal(OAuthErrorDomain))
+                        default:
+                            fail()
+                        }
                     }
 
                     it("fails with the correct error code") {
-                        expect(result?.error?.code).to(equal(OAuthErrorInvalidClient))
+                        switch result {
+                        case .failure(let error):
+                            expect(error.code).to(equal(OAuthErrorInvalidClient))
+                        default:
+                            fail()
+                        }
                     }
                 }
 
@@ -746,14 +864,14 @@ class HeimdallrSpec: QuickSpec {
                     it("only the first one triggers a token refresh") {
                         var firstAuthenticateRequestDone = false
                         var madeNetworkRequestAfterFirstAuthenticateRequestDone = false
-                        OHHTTPStubs.stubRequests(passingTest: { _ in
+                        HTTPStubs.stubRequests(passingTest: { _ in
                                 if firstAuthenticateRequestDone {
                                     madeNetworkRequestAfterFirstAuthenticateRequestDone = true
                                 }
                                 return true
                             }, withStubResponse: { _ in
                                 let data = try! Data(contentsOf: self.bundle.url(forResource: "request-valid", withExtension: "json")!)
-                                return OHHTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
+                                return HTTPStubsResponse(data: data, statusCode: 200, headers: [ "Content-Type": "application/json" ])
                         })
 
                         waitUntil { done in
