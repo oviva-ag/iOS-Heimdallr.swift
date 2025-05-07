@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'Heimdallr'
-  spec.version = '3.8.0-oviva'
+  spec.version = '3.9.0-oviva'
   spec.authors = {
     'oviva'   => 'ios@oviva.com',
     'trivago' => 'info@trivago.de'
