@@ -149,6 +149,24 @@ class OAuthAccessTokenSpec: QuickSpec {
                     expect(accessToken?.refreshToken).to(beNil())
                 }
             }
+            context("with expiration date") {
+                it("creates a valid access token") {
+                    let accessToken = OAuthAccessToken.decode([
+                        "access_token": "accessToken" as AnyObject,
+                        "token_type": "tokenType" as AnyObject,
+                        "expires_in": 3600 as AnyObject,
+                        "refresh_token": "refreshToken" as AnyObject,
+                        "id_token": "idToken" as AnyObject
+                    ])
+
+                    expect(accessToken).toNot(beNil())
+                    expect(accessToken?.accessToken).to(equal("accessToken"))
+                    expect(accessToken?.tokenType).to(equal("tokenType"))
+                    expect(accessToken?.expiresAt).toNot(beNil())
+                    expect(accessToken?.refreshToken).to(equal("refreshToken"))
+                    expect(accessToken?.idToken).to(equal("idToken"))
+                }
+            }
         }
     }
 }
