@@ -143,7 +143,7 @@ public let HeimdallrErrorNotAuthorized = 2
             if let error = error {
                 completion(.failure(error as NSError))
             } else if (response as! HTTPURLResponse).statusCode == 200 {
-                if let accessToken = try? self.accessTokenParser.parse(data: data!) {
+                if let accessToken = try? self.decodeAccessToken(from: data!, for: grant) {
                     self.accessToken = accessToken
                     completion(.success(accessToken))
                 } else {
@@ -168,6 +168,18 @@ public let HeimdallrErrorNotAuthorized = 2
                     completion(.failure(error))
                 }
             }
+        }
+    }
+
+    private func decodeAccessToken(from data: Data, for grant: OAuthAuthorizationGrant) throws -> OAuthAccessToken {
+        let token = try accessTokenParser.parse(data: data)
+        switch grant {
+        case .refreshToken:
+            // When using refreshToken - idToken is not returned so use the existing one if it exists.
+            return token.copy(idToken: accessToken?.idToken)
+
+        default:
+            return token
         }
     }
 
