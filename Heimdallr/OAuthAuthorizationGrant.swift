@@ -2,7 +2,7 @@ import Foundation
 
 /// An authorization grant is a credential representing the resource owner's
 /// authorization (to access its protected resources).
-public enum OAuthAuthorizationGrant {
+public enum OAuthAuthorizationGrant: Sendable, Hashable {
     /// A resource owner password credentials grant.
     ///
     /// - parameter username: The resource owner's username.

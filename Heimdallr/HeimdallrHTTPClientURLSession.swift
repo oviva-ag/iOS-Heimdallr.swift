@@ -2,7 +2,7 @@ import Foundation
 
 /// An HTTP client that uses URLSession.
 @objc
-public class HeimdallrHTTPClientURLSession: NSObject, HeimdallrHTTPClient {
+public final class HeimdallrHTTPClientURLSession: NSObject, HeimdallrHTTPClient {
 
     let urlSession: URLSession
 
@@ -20,7 +20,7 @@ public class HeimdallrHTTPClientURLSession: NSObject, HeimdallrHTTPClient {
     ///
     /// - parameter request: The request to be sent.
     /// - parameter completion: A callback to invoke when the request completed.
-    public func sendRequest(_ request: URLRequest, completion: @escaping (_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void) {
+    public func sendRequest(_ request: URLRequest, completion: @Sendable @escaping (_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void) {
         let task = urlSession.dataTask(with: request, completionHandler: completion)
         task.resume()
     }
