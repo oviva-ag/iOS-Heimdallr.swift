@@ -3,7 +3,7 @@ import Nimble
 import OHHTTPStubs
 import Quick
 
-class OAuthAccessTokenMockStore: OAuthAccessTokenStore {
+final class OAuthAccessTokenMockStore: OAuthAccessTokenStore, @unchecked Sendable {
     var storeAccessTokenCalled: Bool = false
 
     var mockedAccessToken: OAuthAccessToken? = nil
@@ -22,8 +22,8 @@ class OAuthAccessTokenMockStore: OAuthAccessTokenStore {
 
 let ParserErrorDomain = "ParserErrorDomain"
 
-class OAuthAccessTokenInterceptorParser: OAuthAccessTokenParser {
-    
+final class OAuthAccessTokenInterceptorParser: OAuthAccessTokenParser, @unchecked Sendable {
+
     let defaultParser = OAuthAccessTokenDefaultParser()
     
     var timesCalled = 0
@@ -64,7 +64,7 @@ class OAuthAccessTokenInterceptorParser: OAuthAccessTokenParser {
     }
 }
 
-class HeimdallResourceRequestMockAuthenticator: HeimdallResourceRequestAuthenticator {
+final class HeimdallResourceRequestMockAuthenticator: HeimdallResourceRequestAuthenticator, @unchecked Sendable {
     @objc func authenticateResourceRequest(_ request: URLRequest, accessToken: OAuthAccessToken) -> URLRequest {
         var mutableRequest = request
         mutableRequest.addValue("totally", forHTTPHeaderField: "MockAuthorized")

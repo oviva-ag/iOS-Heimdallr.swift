@@ -736,6 +736,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				ENABLE_MODULE_VERIFIER = YES;
 				INFOPLIST_FILE = "Heimdallr/Supporting Files/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -756,6 +757,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				ENABLE_MODULE_VERIFIER = YES;
 				INFOPLIST_FILE = "Heimdallr/Supporting Files/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -773,6 +775,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEAD_CODE_STRIPPING = YES;
 				INFOPLIST_FILE = "HeimdallrTests/Supporting Files/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -790,6 +793,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEAD_CODE_STRIPPING = YES;
 				INFOPLIST_FILE = "HeimdallrTests/Supporting Files/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -813,6 +817,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
@@ -830,6 +835,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
@@ -844,6 +850,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = HeimdallrTests;
 				SWIFT_VERSION = 5.0;
 			};
@@ -859,6 +866,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = HeimdallrTests;
 				SWIFT_VERSION = 5.0;
 			};
