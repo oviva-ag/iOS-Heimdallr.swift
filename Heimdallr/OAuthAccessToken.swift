@@ -2,7 +2,7 @@ import Foundation
 
 /// An access token is used for authorizing requests to the resource endpoint.
 @objc
-public class OAuthAccessToken: NSObject {
+public final class OAuthAccessToken: NSObject, Sendable {
 
     /// The access token.
     public let accessToken: String

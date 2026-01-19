@@ -2,7 +2,7 @@ import Foundation
 
 /// An HTTP authentication is used for authorizing requests to either the token
 /// or the resource endpoint.
-public enum HTTPAuthentication: Equatable {
+public enum HTTPAuthentication: Equatable, Sendable {
     /// HTTP Basic Authentication.
     ///
     /// - parameter username: The username.

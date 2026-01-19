@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-internal struct Keychain {
+internal struct Keychain: Sendable {
     internal let service: String
 
     fileprivate var defaultClassAndAttributes: [String: AnyObject] {
@@ -91,7 +91,7 @@ internal struct Keychain {
 }
 
 /// A persistent keychain-based access token store.
-@objc public class OAuthAccessTokenKeychainStore: NSObject, OAuthAccessTokenStore {
+@objc public final class OAuthAccessTokenKeychainStore: NSObject, OAuthAccessTokenStore, @unchecked Sendable {
     private var keychain: Keychain
 
     /// Creates an instance initialized to the given keychain service.

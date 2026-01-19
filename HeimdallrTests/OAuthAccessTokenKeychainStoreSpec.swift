@@ -1,6 +1,8 @@
-@testable import Heimdallr
+import Foundation
 import Nimble
 import Quick
+
+@testable import Heimdallr
 
 class OAuthAccessTokenKeychainStoreSpec: QuickSpec {
     override class func spec() {

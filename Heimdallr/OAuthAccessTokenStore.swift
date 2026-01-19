@@ -2,7 +2,7 @@ import Foundation
 
 /// A (persistent) access token store.
 @objc
-public protocol OAuthAccessTokenStore {
+public protocol OAuthAccessTokenStore: Sendable {
     /// Stores the given access token.
     ///
     /// Given nil, it resets the currently stored access token, if any.

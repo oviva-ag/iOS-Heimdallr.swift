@@ -12,7 +12,7 @@ public let OAuthErrorInvalidScope = 6
 
 public let OAuthURIErrorKey = "OAuthURIErrorKey"
 
-public enum OAuthErrorCode: String {
+public enum OAuthErrorCode: String, Sendable {
     case InvalidRequest = "invalid_request"
     case InvalidClient = "invalid_client"
     case InvalidGrant = "invalid_grant"
@@ -48,7 +48,7 @@ extension OAuthErrorCode {
     }
 }
 
-public class OAuthError {
+public final class OAuthError: Sendable {
     public let code: OAuthErrorCode
     public let description: String?
     public let uri: String?
